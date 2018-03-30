@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">andromover</string>
+    <string name="left_button">Left button</string>
+    <string name="right_button">Right button</string>
 </resources>
