@@ -2,4 +2,21 @@
     <string name="app_name">andromover</string>
     <string name="left_button">Left button</string>
     <string name="right_button">Right button</string>
+
+    <string name="title_activity_menu">MenuActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <string name="intro_text">Welcome in our awesome application to move things from far far away</string>
+    <string name="intro_text_details">To use this awesome app you need to connect to server app</string>
+    <string name="bluetooth_button">Connect via bluetooth</string>
+    <string name="internet_button">Connect via internet</string>
+
+
+    <string name="server_ip_input_title">Connection info</string>
+    <string name="ip_address">IP address</string>
+    <string name="ip_port">Port number</string>
+    <string name="bluetooth_title">Choose paired device</string>
+
+
 </resources>
