@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -28,16 +29,14 @@ public class MenuActivity extends Activity {
                 .setView(dialogView)
                 .setTitle(R.string.server_ip_input_title)
                 .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> {
-                    startWorking("192.168.0.5", 8888);
+                    EditText ipInput = dialogView.findViewById(R.id.ipInput);
+                    EditText portInput = dialogView.findViewById(R.id.portInput);
 
-//                            EditText ipInput = dialogView.findViewById(R.id.ipInput);
-//                            EditText portInput = dialogView.findViewById(R.id.portInput);
-//
-//                            String ipAddress = ipInput.getText().toString();
-//                            String port = portInput.getText().toString();
-//                            if(!ipAddress.isEmpty() && !port.isEmpty()) {
-//                                startWorking(ipAddress, Integer.parseInt(port));
-//                            }
+                    String ipAddress = ipInput.getText().toString();
+                    String port = portInput.getText().toString();
+                    if(!ipAddress.isEmpty() && !port.isEmpty()) {
+                        startWorking(ipAddress, Integer.parseInt(port));
+                    }
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
