@@ -2,6 +2,8 @@ import socket
 import argparse
 from typing import Callable, Optional
 
+from andromover_mouse import Mouse
+
 
 BACKLOG = 0
 BLUETOOTH_PROTO = socket.BTPROTO_RFCOMM
@@ -13,7 +15,7 @@ def echo(msg):
 
 
 def recv(sock: socket.socket, size: Optional[int] = 4):
-    msg_size = sock.recv(size)
+    msg_size = int(sock.recv(size))
     buffer = bytearray(msg_size)
     mv = memoryview(buffer)
     while msg_size:
@@ -28,47 +30,48 @@ def serve(address: str, port: int, *,
           callback: Callable[[bytes], Optional[bytes]] = echo):
 
     if bluetooth:
-        server = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM,
-                               BLUETOOTH_PROTO)
+        server_sock = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM,
+                                    BLUETOOTH_PROTO)
     else:
-        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind((address, port))
-    server.listen(BACKLOG)
+        server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    with server:
+    server_sock.bind((address, port))
+    server_sock.listen(BACKLOG)
+
+    with server_sock:
         while True:
-            client, addr = server.accept()
-            client.settimeout(keepalive)
-            print('Started connection with: {}'.format(addr))
+            client_sock, client_addr = server_sock.accept()
+            client_sock.settimeout(keepalive)
+            print('Started connection with: {}'.format(client_addr))
             try:
                 while True:
-                    data = client.recv(1024)
+                    data = client_sock.recv(1024)
                     if not data:
                         print('Connection closed by peer')
                         break
                     reply = callback(data)
                     if reply:
-                        client.send(reply)
+                        client_sock.send(reply)
             except socket.timeout:
                 print('Connection timed out')
             finally:
-                client.close()
+                client_sock.close()
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--address', default='localhost',
-                        help='address on which to accept connection')
+                        help='IPv4 address on which to accept connection')
     parser.add_argument('-p', '--port', type=int, default=8080,
-                        help='port on which to accept connection')
+                        help='Port on which to accept connection')
     parser.add_argument('-b', '--bluetooth', action='store_true',
-                        help='if set, specified address will br considered to '
+                        help='If set, specified address will be considered to '
                              'be of bluetooth family rather than inet (default)')
     parser.add_argument('-k', '--keepalive', type=float, default=None,
-                        help='timeout of inactivity on connection after which '
+                        help='Timeout of inactivity on connection after which '
                              'it is severed (by default it is infinity)')
     args = parser.parse_args()
 
     serve(args.address, args.port, bluetooth=args.bluetooth,
-          keepalive=args.keepalive)
+          keepalive=args.keepalive, callback=Mouse())
