@@ -17,6 +17,9 @@
     <string name="ip_address">IP address</string>
     <string name="ip_port">Port number</string>
     <string name="bluetooth_title">Choose paired device</string>
+    <string name="connection_error_title">Connection error</string>
+    <string name="connection_error_message">There is a problem with connection</string>
+    <string name="button_ok">Ok</string>
 
 
 </resources>

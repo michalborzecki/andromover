@@ -1,6 +1,8 @@
 package sr.andromover;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.View;
@@ -34,7 +36,15 @@ public class MainActivity extends Activity implements MoveDetectorListener {
 
         ConnectionData connectionData = (ConnectionData)getIntent().getExtras().get(Constants.CONNECTION_DATA);
 
-        connectionManager = ConnectionManagerFactory.create(connectionData);
+        Runnable errorCallback = () -> this.runOnUiThread(() ->  {
+            new AlertDialog.Builder(MainActivity.this)
+                .setTitle(R.string.connection_error_title)
+                .setMessage(R.string.connection_error_message)
+                .setNeutralButton(R.string.button_ok, (dialogInterface, i) -> finish())
+                .show();
+        });
+
+        connectionManager = ConnectionManagerFactory.create(connectionData, errorCallback);
 
         addButtonsClickListeners();
 

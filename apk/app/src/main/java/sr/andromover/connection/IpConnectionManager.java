@@ -9,6 +9,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 import sr.andromover.connection.data.ConnectionData;
 import sr.andromover.message.Message;
@@ -18,18 +19,21 @@ public class IpConnectionManager implements ConnectionManager {
     private final String address;
     private final int port;
 
-    private final Socket socket;
+    private Socket socket;
+
+    private Runnable errorCallback;
 
     private OutputStreamWriter writer;
 
     private Executor networkTasksExecutor = Executors.newSingleThreadExecutor();
 
-    public IpConnectionManager(ConnectionData connectionData) {
+    public IpConnectionManager(ConnectionData connectionData, Runnable errorCallback) {
         this(connectionData.address(), connectionData.port());
+        this.errorCallback = errorCallback;
     }
 
 
-    public IpConnectionManager(String address, int port) {
+    private IpConnectionManager(String address, int port) {
         this.address = address;
         this.port = port;
 
@@ -43,7 +47,8 @@ public class IpConnectionManager implements ConnectionManager {
             OutputStream outputStream = this.socket.getOutputStream();
             writer = new OutputStreamWriter(outputStream);
         } catch (IOException e) {
-            e.printStackTrace();
+            this.socket = null;
+            errorCallback.run();
         }
     }
 
@@ -52,12 +57,13 @@ public class IpConnectionManager implements ConnectionManager {
     }
 
     private void executeSendingMessage(Message message) {
-        if (socket.isConnected()) {
+        if (socket != null && socket.isConnected()) {
             try {
                 writer.write(message.getMessageJSON().toString());
                 writer.flush();
             } catch (IOException e) {
-                e.printStackTrace();
+                this.socket = null;
+                errorCallback.run();
             }
         }
 
