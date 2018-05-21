@@ -4,12 +4,12 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 import sr.andromover.connection.data.ConnectionData;
 import sr.andromover.message.Message;
@@ -23,7 +23,7 @@ public class IpConnectionManager implements ConnectionManager {
 
     private Runnable errorCallback;
 
-    private OutputStreamWriter writer;
+    private OutputStream outputStream;
 
     private Executor networkTasksExecutor = Executors.newSingleThreadExecutor();
 
@@ -44,8 +44,7 @@ public class IpConnectionManager implements ConnectionManager {
     private void connect() {
         try {
             this.socket.connect(new InetSocketAddress(this.address, this.port));
-            OutputStream outputStream = this.socket.getOutputStream();
-            writer = new OutputStreamWriter(outputStream);
+            outputStream = this.socket.getOutputStream();
         } catch (IOException e) {
             this.socket = null;
             errorCallback.run();
@@ -59,8 +58,11 @@ public class IpConnectionManager implements ConnectionManager {
     private void executeSendingMessage(Message message) {
         if (socket != null && socket.isConnected()) {
             try {
-                writer.write(message.getMessageJSON().toString());
-                writer.flush();
+                byte[] messageJson = message.getMessageJSON().toString().getBytes();
+                byte[] lenBytes = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(messageJson.length).array();
+                outputStream.write(lenBytes);
+                outputStream.write(messageJson);
+                outputStream.flush();
             } catch (IOException e) {
                 this.socket = null;
                 errorCallback.run();

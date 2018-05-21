@@ -1,11 +1,6 @@
 package sr.andromover.connection.data;
 
 import java.io.Serializable;
-import java.util.function.Consumer;
-
-import sr.andromover.connection.BluetoothConnectionManager;
-import sr.andromover.connection.ConnectionManager;
-import sr.andromover.connection.IpConnectionManager;
 
 public class ConnectionData implements Serializable {
 
